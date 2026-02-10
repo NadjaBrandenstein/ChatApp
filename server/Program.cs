@@ -4,18 +4,25 @@ using StateleSSE.AspNetCore;
 using StateleSSE.AspNetCore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var redis = builder.Configuration.GetSection("Redis").Value;
+
 builder.Services.Configure<HostOptions>(options =>
 {
     options.ShutdownTimeout = TimeSpan.FromSeconds(0); 
 });
-// builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-// {
-//     var config = ConfigurationOptions.Parse("localhost:6379");
-//     config.AbortOnConnectFail = false;
-//     return ConnectionMultiplexer.Connect(config);
-// });
 
 //builder.Services.AddRedisSseBackplane();builder.Services.AddControllers();
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = ConfigurationOptions.Parse( redis    );
+    config.AbortOnConnectFail = false;
+    return ConnectionMultiplexer.Connect(config);
+});
+
+builder.Services.AddRedisSseBackplane();
+
 builder.Services.AddOpenApiDocument();
 
 builder.Services.AddControllers()
@@ -23,7 +30,7 @@ builder.Services.AddControllers()
     {
         opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
-builder.Services.AddInMemorySseBackplane();
+//builder.Services.AddInMemorySseBackplane();
 
 builder.Services.AddCors(options =>
 {

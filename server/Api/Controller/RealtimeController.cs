@@ -30,16 +30,13 @@ public class RealtimeController(ISseBackplane backplane) : ControllerBase
         await backplane.Clients.SendToGroupAsync(dto.room, new JoinResponse("Someone has entered the chat!"));
     }
 
+
     [HttpPost("send")]
     public async Task Send([FromBody] ChatMessageDto dto)
     {
         await backplane.Clients.SendToGroupAsync(dto.room, new ChatResponse(dto.user, dto.message));
     }
     
-    // [HttpPost("poke")]
-    // public async Task Poke(string room)
-    //     => await backplane.Clients.SendToGroupAsync(room, "poked");
-
     [HttpPost("poke")]
     public async Task Poke(string connectionId)
     {
