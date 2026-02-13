@@ -19,6 +19,72 @@
         }
       }
     },
+    "/register": {
+      "post": {
+        "tags": [
+          "Realtime"
+        ],
+        "operationId": "Realtime_Register",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "Realtime"
+        ],
+        "operationId": "Realtime_Login",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/join": {
       "post": {
         "tags": [
@@ -156,6 +222,39 @@
         }
       }
     },
+    "/rooms": {
+      "post": {
+        "tags": [
+          "Realtime"
+        ],
+        "operationId": "Realtime_CreateRoom",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoomDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Messages": {
       "post": {
         "tags": [
@@ -224,6 +323,18 @@
   },
   "components": {
     "schemas": {
+      "AuthDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
       "JoinDto": {
         "type": "object",
         "additionalProperties": false,
@@ -245,9 +356,6 @@
           },
           "message": {
             "type": "string"
-          },
-          "user": {
-            "type": "string"
           }
         }
       },
@@ -260,6 +368,15 @@
           },
           "isTyping": {
             "type": "boolean"
+          }
+        }
+      },
+      "CreateRoomDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "roomName": {
+            "type": "string"
           }
         }
       },

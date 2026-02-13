@@ -1,0 +1,36 @@
+
+.front-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f2f2f2;
+    color: black;
+}
+
+.front-container button {
+    color: black;
+    background: #4a90e2;
+}
+
+.room-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.room-button {
+    text-decoration: none;
+    padding: 12px 24px;
+    background-color: #4a90e2;
+    color: white;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.room-button:hover {
+    background-color: #357abd;
+}

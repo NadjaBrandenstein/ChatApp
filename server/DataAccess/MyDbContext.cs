@@ -55,7 +55,6 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Senderuserid).HasColumnName("senderuserid");
             entity.Property(e => e.Sentat)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("sentat");
 
             entity.HasOne(d => d.Recipientuser).WithMany(p => p.MessageRecipientusers)

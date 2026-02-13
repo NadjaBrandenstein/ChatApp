@@ -5,6 +5,9 @@ using Infrastructure.Postgres.Scaffolding;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using StateleSSE.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 public class Program
 {
@@ -20,7 +23,7 @@ public class Program
         
         builder.Services.AddDbContext<MyDbContext>(options =>
             options.UseNpgsql(connectionString)
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                // .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
         );
         
         // --------------------------
@@ -73,7 +76,33 @@ public class Program
             options.ShutdownTimeout = TimeSpan.FromSeconds(0); 
         });
         
-        
+        // --------------------------
+        // JWT
+        // --------------------------
+        var jwtKey = builder.Configuration["Jwt:Key"];
+
+        builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtKey))
+                };
+            });
+            
+        builder.Services.AddAuthorization();
+        builder.Services.AddScoped<JwtService>();
+
+
         //builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     }
 
@@ -93,7 +122,6 @@ public class Program
         
         app.UseDefaultFiles();
         app.UseStaticFiles();
-        app.MapControllers();
         app.UseOpenApi();
         app.UseSwaggerUi();
         
@@ -101,6 +129,10 @@ public class Program
         {
             await app.GenerateApiClientsFromOpenApi("/../../client/src/generated-ts-client.ts");
         }
+        
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
         
         app.MapControllers();
         

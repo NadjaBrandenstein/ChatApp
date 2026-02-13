@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import Chat from "./UI/Chat.tsx";
+import { Chat } from "./UI/Chat.tsx";
 
 function ChatRoom() {
     const { roomName } = useParams<{ roomName: string }>();

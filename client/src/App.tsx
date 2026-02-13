@@ -2,6 +2,7 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
 
 import Front from "./UI/Front.tsx";
 import ChatRoom from "./ChatRoom.tsx";
+import {Toaster} from "react-hot-toast";
 
 const App = () =>{
 
@@ -16,7 +17,13 @@ const App = () =>{
         },
     ]);
 
-    return <RouterProvider router={router}/>
+    return (
+        <div>
+            <Toaster position="top-center"/>
+            <RouterProvider router={router}/>
+        </div>
+    )
+
 }
 
 export default App;
