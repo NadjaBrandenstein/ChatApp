@@ -27,7 +27,7 @@
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 88vh;
     max-width: 600px;
     margin: 0 auto;
     border: 1px solid #ccc;
@@ -107,7 +107,7 @@
 }
 
 .chat-input button:hover {
-    background-color: #f2d000;
+    background-color: #f2c000;
 }
 
 .typing-indicator {
