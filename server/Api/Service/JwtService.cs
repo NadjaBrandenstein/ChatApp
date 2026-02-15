@@ -54,7 +54,7 @@ public class JwtService
             }, out SecurityToken validatedToken);
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.UniqueName).Value;
+            return jwtToken.Claims.First(x => x.Type == ClaimTypes.Name).Value;
         }
         catch
         {
