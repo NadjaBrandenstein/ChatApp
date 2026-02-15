@@ -90,6 +90,31 @@ export function Chat({ room }: { room: string }) {
         }
     };
 
+    //Load previous messages when entering room
+    useEffect(() => {
+        if(!room) {
+            return;
+        }
+
+        const loadMessages = async () => {
+            try{
+                const res = await fetch(`http://localhost:5050/messages/${room}`);
+
+                if(!res.ok){
+                    return;
+                }
+
+                const data = await res.json();
+
+                setMessages(data.reverse());
+            }
+            catch(err){
+                console.error("Failed to load message:", err);
+            }
+        };
+        loadMessages();
+    },[room])
+
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") sendMessage();
     };
