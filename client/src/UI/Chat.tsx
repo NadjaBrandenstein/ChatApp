@@ -16,8 +16,8 @@ export function Chat({ room }: { room: string }) {
     const chatEndRef = useRef<HTMLDivElement | null>(null);
 
     const stream = useStream();
-    const username = localStorage.getItem("username");
-    const token = localStorage.getItem("token");
+    const username = sessionStorage.getItem("username");
+    const token = sessionStorage.getItem("token");
 
     // Join room when connected
     useEffect(() => {

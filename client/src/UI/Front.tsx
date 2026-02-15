@@ -9,7 +9,7 @@ function Front() {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const isLoggedIn = !!localStorage.getItem("token");
+    const isLoggedIn = !!sessionStorage.getItem("token");
 
     const [newRoom, setNewRoom] = useState("");
     const [rooms, setRooms] = useState<string[]>([]);
@@ -27,8 +27,9 @@ function Front() {
         }
 
         const data = await res.json();
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", username);
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("username", username);
+        window.dispatchEvent(new Event("authChanged"));
         toast.success("Login successful!");
 
         await fetchRooms();
@@ -52,7 +53,7 @@ function Front() {
     const createRoom = async () => {
         if (!newRoom.trim()) return;
 
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const res = await fetch("http://localhost:5050/rooms", {
             method: "POST",
             headers: {
@@ -73,7 +74,7 @@ function Front() {
     };
 
     const fetchRooms = async () => {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const res = await fetch("http://localhost:5050/getRooms", {
             method: "GET",
             headers: {
@@ -91,7 +92,7 @@ function Front() {
     };
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
 
         if(token){
             fetchRooms();
