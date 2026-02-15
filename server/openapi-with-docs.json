@@ -12,6 +12,16 @@
           "Realtime"
         ],
         "operationId": "Realtime_Connect",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -222,6 +232,59 @@
         }
       }
     },
+    "/messages/{roomName}": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "operationId": "Realtime_GetLastMessages",
+        "parameters": [
+          {
+            "name": "roomName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getRooms": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "operationId": "Realtime_GetRooms",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/rooms": {
       "post": {
         "tags": [
@@ -240,71 +303,6 @@
           "required": true,
           "x-position": 1
         },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Messages": {
-      "post": {
-        "tags": [
-          "Messages"
-        ],
-        "operationId": "Messages_SendMessage",
-        "requestBody": {
-          "x-name": "dto",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Messages/{roomName}": {
-      "get": {
-        "tags": [
-          "Messages"
-        ],
-        "operationId": "Messages_GetLastMessages",
-        "parameters": [
-          {
-            "name": "roomName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
         "responses": {
           "200": {
             "description": "",
@@ -344,6 +342,9 @@
           },
           "room": {
             "type": "string"
+          },
+          "username": {
+            "type": "string"
           }
         }
       },
@@ -377,26 +378,6 @@
         "properties": {
           "roomName": {
             "type": "string"
-          }
-        }
-      },
-      "CreateMessageDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "roomName": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "recipientUserId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
           }
         }
       }

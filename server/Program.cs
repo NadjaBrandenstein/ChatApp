@@ -1,6 +1,6 @@
+using System.Security.Claims;
 using System.Text.Json;
 using api;
-using api.Service;
 using Infrastructure.Postgres.Scaffolding;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -51,11 +51,6 @@ public class Program
         builder.Services.AddOpenApiDocument();
         
         // --------------------------
-        // Service
-        // --------------------------
-        builder.Services.AddScoped<MessageService>();
-        
-        // --------------------------
         // Cors
         // --------------------------
         builder.Services.AddCors(options =>
@@ -63,7 +58,7 @@ public class Program
             options.AddPolicy("FrontendPolicy", policy =>
             {
                 policy
-                    .WithOrigins("http://localhost:5174") // your React dev server
+                    .WithOrigins("http://localhost:5173") // your React dev server
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
@@ -95,7 +90,8 @@ public class Program
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtKey))
+                        Encoding.UTF8.GetBytes(jwtKey)),
+                    NameClaimType = ClaimTypes.Name
                 };
             });
             
@@ -118,7 +114,8 @@ public class Program
         app.UseRouting();
         //app.UseExceptionHandler();
 
-        app.UseCors(conf => conf.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(_ => true));
+        //app.UseCors(conf => conf.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(_ => true));
+        app.UseCors("FrontendPolicy");
         
         app.UseDefaultFiles();
         app.UseStaticFiles();

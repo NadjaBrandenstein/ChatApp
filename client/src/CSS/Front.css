@@ -5,9 +5,59 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #f2f2f2;
-    color: black;
+    gap: 10px;
+    padding: 10px;
+    color: #333;
+    font-family: Arial, sans-serif;
 }
+
+h2{
+    margin-bottom: 10px;
+    color: #FFF;
+}
+
+.card{
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 300px;
+    align-items: center;
+}
+
+.card input{
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.card button{
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: #fff;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.card button:hover {
+    background-color: #357abd;
+}
+
+.card-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
 
 .front-container button {
     color: black;
@@ -17,18 +67,21 @@
 .room-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 10px;
+    width: 100%;
 }
 
 .room-button {
-    text-decoration: none;
-    padding: 12px 24px;
+    width: 100%;
+    padding: 12px;
     background-color: #4a90e2;
     color: white;
-    border-radius: 6px;
-    text-align: center;
     font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-top: 10px;
 }
 
 .room-button:hover {

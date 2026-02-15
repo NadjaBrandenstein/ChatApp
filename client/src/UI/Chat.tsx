@@ -1,133 +1,121 @@
 import '../CSS/Chat.css'
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
+import { useStream } from "../Hooks/useStream";
 
-type ChatProps = {
-    room:string;
-};
-
-
-type ChatMessage ={
+type ChatMessage = {
     user: string;
     message: string;
 };
 
-
-export function Chat({room}: ChatProps) {
+export function Chat({ room }: { room: string }) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
     const [isSomeoneTyping, setIsSomeoneTyping] = useState(false);
+
     const typingTimeoutRef = useRef<number | null>(null);
+    const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-
-    const chatEndRef = useRef(null);
-
-
+    const stream = useStream();
     const username = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
 
+    // Join room when connected
+    useEffect(() => {
+        if (!room || !stream.isConnected) return;
+        if (!stream.connectionId) return;
 
-    // Connect to SSE
+        fetch("http://localhost:5050/join", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                connectionId: stream.connectionId,
+                room,
+                username
+            })
+        });
+    }, [room, stream.isConnected, stream.connectionId]);
+
+    // Listen for chat messages
     useEffect(() => {
         if (!room) return;
-        const eventSource = new EventSource("http://localhost:5050/connect");
 
-
-        eventSource.addEventListener("connected", (event) => {
-            const data = JSON.parse(event.data);
-
-
-            const token = localStorage.getItem("token");
-
-
-            // Join room
-            fetch("http://localhost:5050/join", {
-                method: "POST",
-                headers: { "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    connectionId: data.connectionId,
-                    room
-                })
-            });
-        });
-
-
-        eventSource.addEventListener(room, (event) => {
-            const data = JSON.parse(event.data);
-
-            if(typeof data.isTyping === "boolean") {
-                setIsSomeoneTyping(data.isTyping);
-                return;
+        const cleanupChat = stream.on<ChatMessage>(
+            room,
+            "ChatResponse",
+            (msg) => {
+                setMessages(prev => [...prev, msg]);
             }
+        );
 
-            if (data.message && data.user) {
-                setMessages(prev => [...prev, data]);
+        const cleanupTyping = stream.on<{ user: string; isTyping: boolean }>(
+            room,
+            "TypingResponse",
+            (data) => {
+                if (data.user !== username) {
+                    setIsSomeoneTyping(data.isTyping);
+                }
             }
-            //setMessages(prev => [...prev, data.message ?? data.Message]);
-        });
+        );
 
+        return () => {
+            cleanupChat();
+            cleanupTyping();
+        };
+    }, [room, stream]);
 
-        return () => eventSource.close();
-    }, [room]);
-
-
-    const sendMessage  = async () => {
-        if(!input.trim()) return;
-
-
-        const token = localStorage.getItem("token");
-
-
+    // Send message
+    const sendMessage = async () => {
+        if (!input.trim() || !username) return;
+        console.log("Sending message as user:", username);
         try {
             await fetch("http://localhost:5050/send", {
                 method: "POST",
-                headers: {"Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`},
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     room,
                     message: input
                 })
             });
+
             sendTyping(false);
-            setInput(""); // clear input after successful send
+            setInput("");
         } catch (err) {
             console.error("Failed to send message:", err);
         }
-    }
-
+    };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") sendMessage();
-    }
-
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInput(e.target.value);
 
-
         sendTyping(true);
-
 
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
         }
 
-
         typingTimeoutRef.current = window.setTimeout(() => {
             sendTyping(false);
-        }, 1000); // stops after 1s of inactivity
+        }, 1000);
     };
 
-
     const sendTyping = async (isTyping: boolean) => {
-        const token = localStorage.getItem("token");
-
-
         try {
             await fetch("http://localhost:5050/typing", {
                 method: "POST",
-                headers: { "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`},
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     room,
                     isTyping
@@ -138,31 +126,29 @@ export function Chat({room}: ChatProps) {
         }
     };
 
-
     return (
         <div className="chat-container">
             <div className="chat-box">
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={`chat-message ${msg.user === username ? "own" : ""}`}>
+                    <div
+                        key={idx}
+                        className={`chat-message ${msg.user === username ? "own" : ""}`}
+                    >
                         <div className="chat-user">{msg.user}</div>
                         <div className="chat-bubble">{msg.message}</div>
                     </div>
                 ))}
+
                 {isSomeoneTyping && (
                     <div className="typing-indicator">
                         Someone is typing...
                     </div>
                 )}
+
                 <div ref={chatEndRef} />
             </div>
 
-
             <div className="chat-input">
-                {/*<button onClick={() => {*/}
-
-
-                {/*}}*/}
-                {/*>Poke</button>*/}
                 <input
                     type="text"
                     value={input}
@@ -173,5 +159,5 @@ export function Chat({room}: ChatProps) {
                 <button onClick={sendMessage}>Send</button>
             </div>
         </div>
-    )
+    );
 }

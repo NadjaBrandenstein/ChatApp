@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using api.Dto;
-using api.Service;
 using efscaffold.Entities;
 using Infrastructure.Postgres.Scaffolding;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +13,6 @@ using StateleSSE.AspNetCore;
 [Route("")]
 public class RealtimeController(
     ISseBackplane backplane,
-    MessageService msgService,
     MyDbContext ctx,
     JwtService jwtService) : ControllerBase
 {
@@ -22,12 +20,20 @@ public class RealtimeController(
     private readonly JwtService _jwtService = jwtService;
 
     [HttpGet("connect")]
-    public async Task Connect()
+    public async Task Connect([FromQuery] string token)
     {
+        var username = _jwtService.ValidateToken(token);
+        
+        if (username == null)
+        {
+            Response.StatusCode = 401;
+            return;
+        }
+        
         await using var sse = await HttpContext.OpenSseStreamAsync();
         await using var connection = backplane.CreateConnection();
 
-        await sse.WriteAsync("connected", JsonSerializer.Serialize(new { connection.ConnectionId },
+        await sse.WriteAsync("connected", JsonSerializer.Serialize(new { connection.ConnectionId, username },
             new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -92,22 +98,53 @@ public class RealtimeController(
         await backplane.Clients.SendToGroupAsync(dto.room, new JoinResponse("Someone has entered the chat!"));
     }
 
-
-    [Authorize]
+    
     [HttpPost("send")]
+    [Authorize]
     public async Task<IActionResult> Send([FromBody] ChatMessageDto dto)
     {
         var username = User.Identity!.Name;
-        await msgService.SendMessage(new CreateMessageDto
+        if (string.IsNullOrEmpty(username))
         {
-            RoomName = dto.room,
-            Username = username!,
-            Content = dto.message
-        });
+            return Unauthorized("User not found");
+        }
+        
+        var user = await _ctx.Logins
+            .FirstOrDefaultAsync(u => u.Username == username);
+
+        if (user == null)
+        {
+            return BadRequest("User does not exist");
+        }
+
+        var room = await _ctx.Rooms
+            .FirstOrDefaultAsync(r => r.Roomname == dto.room);
+
+        if (room == null)
+        {
+            return BadRequest("Room does not exist");
+        }
+
+        var message = new Message
+        {
+            Content = dto.message,
+            Sentat = DateTime.UtcNow,
+            Senderuserid = user.Userid,
+            Roomid = room.Roomid,
+            Recipientuserid = null
+        };
+        
+        foreach (var claim in User.Claims)
+        {
+            Console.WriteLine($"{claim.Type} = {claim.Value}");
+        }
+
+        _ctx.Messages.Add(message);
+        await _ctx.SaveChangesAsync();
         
         await backplane.Clients.SendToGroupAsync(
             dto.room,
-            new ChatResponse(username!,dto.message)
+            new ChatResponse(username, dto.message)
         );
 
         return Ok();
@@ -134,6 +171,35 @@ public class RealtimeController(
         );
     }
 
+    [HttpGet("messages/{roomName}")]
+    public async Task<ActionResult> GetLastMessages(string roomName)
+    {
+        var messages = await _ctx.Messages.Where(m => m.Room.Roomname == roomName)
+            .Where(m => m.Recipientuserid == null)
+            .OrderByDescending(m => m.Sentat)
+            .Take(20)
+            .Select(m => new
+            {
+                user = m.Senderuser.Username,
+                message = m.Content,
+                sentAt = m.Sentat
+            })
+            .ToListAsync();
+
+        return Ok(messages);
+    }
+    
+    [Authorize]
+    [HttpGet("getRooms")]
+    public async Task<IActionResult> GetRooms()
+    {
+        var rooms = await _ctx.Rooms
+            .Select(r => r.Roomname)
+            .ToListAsync();
+        
+        return Ok(rooms);
+    }
+    
     [Authorize]
     [HttpPost("rooms")]
     public async Task<IActionResult> CreateRoom([FromBody] CreateRoomDto dto)
@@ -153,7 +219,7 @@ public class RealtimeController(
 
     public record JoinResponse(string Message) : BaseResponseDto;
 
-    public record ChatResponse(string user, string message) : BaseResponseDto;
+    public record ChatResponse(string User, string Message) : BaseResponseDto;
 
     public record TypingResponse(string User, bool IsTyping) : BaseResponseDto;
 
@@ -161,6 +227,6 @@ public class RealtimeController(
 
     public record ChatMessageDto(string room, string message);
 
-    public record JoinDto(string connectionId, string room);
+    public record JoinDto(string connectionId, string room, string username);
 
 }

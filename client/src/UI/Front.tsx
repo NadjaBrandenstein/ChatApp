@@ -1,6 +1,6 @@
 import '../CSS/Front.css'
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import toast from "react-hot-toast";
 
 function Front() {
@@ -13,6 +13,41 @@ function Front() {
 
     const [newRoom, setNewRoom] = useState("");
     const [rooms, setRooms] = useState<string[]>([]);
+
+    const handleLogin = async () => {
+        const res = await fetch("http://localhost:5050/login", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        if(!res.ok) {
+            toast.error("Your username or password is wrong!");
+            return;
+        }
+
+        const data = await res.json();
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", username);
+        toast.success("Login successful!");
+
+        await fetchRooms();
+    };
+
+    const handleRegister = async () => {
+        const res = await fetch("http://localhost:5050/register", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        if(!res.ok) {
+            toast.error("Register not successful!");
+            return;
+        }
+
+        toast.success("User created!");
+    };
 
     const createRoom = async () => {
         if (!newRoom.trim()) return;
@@ -37,44 +72,38 @@ function Front() {
         }
     };
 
-    const handleLogin = async () => {
-        const res = await fetch("http://localhost:5050/login", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ username, password })
+    const fetchRooms = async () => {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5050/getRooms", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
         });
 
-        if(!res.ok) {
-            toast.error("Your username or password is wrong!");
-            return;
+        if (res.ok){
+            const data = await res.json();
+            setRooms(data);
+        }else{
+            toast.error("Failed to load rooms!");
         }
-
-        const data = await res.json();
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", username);
-        toast.success("Login successful!");
     };
 
-    const handleRegister = async () => {
-        const res = await fetch("http://localhost:5050/register", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ username, password })
-        });
+    useEffect(() => {
+        const token = localStorage.getItem("token");
 
-        if(!res.ok) {
-            toast.error("Register not successful!");
-            return;
+        if(token){
+            fetchRooms();
         }
 
-        toast.success("User created!");
-    };
+    }, []);
 
     return(
-        <div className="">
-            <h1>Login</h1><br/>
+        <div className="front-container">
 
-            <div className="login-card">
+            <h2>Login</h2><br/>
+            <div className="card">
                 <input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -86,12 +115,14 @@ function Front() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                 />
-                <button onClick={handleLogin}>Login</button>
-                <button onClick={handleRegister}>Register</button>
+                <div className="card-buttons">
+                    <button onClick={handleLogin}>Login</button>
+                    <button onClick={handleRegister}>Register</button>
+                </div>
             </div>
 
-            <h1>New Chat Room</h1><br/>
-            <div className="new-room-card">
+            <h2>New Chat Room</h2><br/>
+            <div className="card">
                 <input
                     className="new-room-input"
                     value={newRoom}
@@ -100,8 +131,10 @@ function Front() {
                 <button onClick={createRoom}>Create Room</button>
             </div>
 
-            <h1>Available Rooms</h1><br/>
-            <div className="rooms-card">
+            <h2>Available Rooms</h2><br/>
+            <div className="card">
+                {rooms.length === 0 && <p>No rooms available.</p>}
+            <div className="rooms-list">
                 {rooms.map((room: string) => (
                     <button
                         key={room}
@@ -111,6 +144,7 @@ function Front() {
                         {room}
                     </button>
                 ))}
+            </div>
             </div>
         </div>
     )
