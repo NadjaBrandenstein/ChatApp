@@ -15,7 +15,8 @@ function Front() {
     const [rooms, setRooms] = useState<string[]>([]);
 
     const handleLogin = async () => {
-        const res = await fetch("http://localhost:5050/login", {
+        //const res = await fetch("http://localhost:5050/login", {
+        const res = await fetch("https://chatapp-server.fly.dev/login", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ username, password })
@@ -36,7 +37,8 @@ function Front() {
     };
 
     const handleRegister = async () => {
-        const res = await fetch("http://localhost:5050/register", {
+        //const res = await fetch("http://localhost:5050/register", {
+        const res = await fetch("https://chatapp-server.fly.dev/register", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ username, password })
@@ -54,7 +56,8 @@ function Front() {
         if (!newRoom.trim()) return;
 
         const token = sessionStorage.getItem("token");
-        const res = await fetch("http://localhost:5050/rooms", {
+        //const res = await fetch("http://localhost:5050/rooms", {
+        const res = await fetch("https://chatapp-server.fly.dev/rooms", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -75,7 +78,8 @@ function Front() {
 
     const fetchRooms = async () => {
         const token = sessionStorage.getItem("token");
-        const res = await fetch("http://localhost:5050/getRooms", {
+        //const res = await fetch("http://localhost:5050/getRooms", {
+        const res = await fetch("https://chatapp-server.fly.dev/getRooms", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -102,50 +106,55 @@ function Front() {
 
     return(
         <div className="front-container">
-
-            <h2>Login</h2><br/>
-            <div className="card">
-                <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                />
-                <div className="card-buttons">
-                    <button onClick={handleLogin}>Login</button>
-                    <button onClick={handleRegister}>Register</button>
+            <div className="section">
+                <h2>Login</h2><br/>
+                <div className="card">
+                    <input
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Username"
+                    />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                    />
+                    <div className="card-buttons">
+                        <button onClick={handleLogin}>Login</button>
+                        <button onClick={handleRegister}>Register</button>
+                    </div>
                 </div>
             </div>
 
-            <h2>New Chat Room</h2><br/>
-            <div className="card">
-                <input
-                    className="new-room-input"
-                    value={newRoom}
-                    onChange={(e) => setNewRoom(e.target.value)}
-                    placeholder="Room Name"/>
-                <button onClick={createRoom}>Create Room</button>
+            <div className="section">
+                <h2>New Chat Room</h2><br/>
+                <div className="card">
+                    <input
+                        className="new-room-input"
+                        value={newRoom}
+                        onChange={(e) => setNewRoom(e.target.value)}
+                        placeholder="Room Name"/>
+                    <button onClick={createRoom}>Create Room</button>
+                </div>
             </div>
 
-            <h2>Available Rooms</h2><br/>
-            <div className="card">
-                {rooms.length === 0 && <p>No rooms available.</p>}
-            <div className="rooms-list">
-                {rooms.map((room: string) => (
-                    <button
-                        key={room}
-                        onClick={() => navigate(`/chat/${room}`)}
-                        disabled={!isLoggedIn}
-                        className="room-button">
-                        {room}
-                    </button>
-                ))}
-            </div>
+            <div className="section">
+                <h2>Available Rooms</h2><br/>
+                <div className="card">
+                    {rooms.length === 0 && <p>No rooms available.</p>}
+                    <div className="rooms-list">
+                        {rooms.map((room: string) => (
+                            <button
+                                key={room}
+                                onClick={() => navigate(`/chat/${room}`)}
+                                disabled={!isLoggedIn}
+                                className="room-button">
+                                {room}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     )

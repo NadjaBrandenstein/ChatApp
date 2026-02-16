@@ -48,7 +48,8 @@ const App = () =>{
             key={token}
         config={{
             connectEvent: "connected",
-            urlForStreamEndpoint: `http://localhost:5050/connect?token=${token}`
+            //urlForStreamEndpoint: `http://localhost:5050/connect?token=${token}`
+            urlForStreamEndpoint: `https://chatapp-server.fly.dev/connect?token=${token}`
         }}>
             {content}
         </StreamProvider>

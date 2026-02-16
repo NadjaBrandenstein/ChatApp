@@ -8,6 +8,7 @@ using StateleSSE.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using StateleSSE.AspNetCore;
 
 public class Program
 {
@@ -18,6 +19,7 @@ public class Program
         // Database (PostgreSQL)
         // --------------------------
         var appOptions = services.AddAppOptions(configuration);
+        var redis = appOptions.Redis;
 
         var connectionString = appOptions.DbConnectionString;
         
@@ -29,16 +31,31 @@ public class Program
         // --------------------------
         // Redis (Render)
         // --------------------------
-        var redis = builder.Configuration.GetSection("Redis").Value;
+        // var redis = builder.Configuration.GetSection("Redis").Value;
         
-        builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        // builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        // {
+        //     var config = ConfigurationOptions.Parse( sp.GetRequiredService<AppOptions>().Redis    );
+        //     config.AbortOnConnectFail = false;
+        //     return ConnectionMultiplexer.Connect(config);
+        // });
+
+        if (!string.IsNullOrEmpty(redis))
         {
-            var config = ConfigurationOptions.Parse( redis    );
-            config.AbortOnConnectFail = false;
-            return ConnectionMultiplexer.Connect(config);
-        });
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var config = ConfigurationOptions.Parse(redis);
+                config.AbortOnConnectFail = false;
+                return ConnectionMultiplexer.Connect(config);
+            });
+            builder.Services.AddRedisSseBackplane();
+        }
+        else
+        {
+            builder.Services.AddInMemorySseBackplane();
+        }
         
-        builder.Services.AddRedisSseBackplane();
+        
         
         // --------------------------
         // Controllers
@@ -53,17 +70,7 @@ public class Program
         // --------------------------
         // Cors
         // --------------------------
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("FrontendPolicy", policy =>
-            {
-                policy
-                    .WithOrigins("http://localhost:5173") // your React dev server
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
-            });
-        });
+        builder.Services.AddCors();
         
         // Prevent shutdown delay (for SSE)
         builder.Services.Configure<HostOptions>(options =>
@@ -115,7 +122,7 @@ public class Program
         //app.UseExceptionHandler();
 
         //app.UseCors(conf => conf.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(_ => true));
-        app.UseCors("FrontendPolicy");
+        app.UseCors(_ => _.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(_ => true));
         
         app.UseDefaultFiles();
         app.UseStaticFiles();

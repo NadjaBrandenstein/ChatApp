@@ -24,7 +24,8 @@ interface BaseResponseDto {
 // ============================================================================
 
 export interface StreamConfig {
-    /** The SSE endpoint URL (e.g., "http://localhost:5050/Connect") */
+    // /** The SSE endpoint URL (e.g., "http://localhost:5050/connect") */
+    /** The SSE endpoint URL (e.g., "https://chatapp-server.fly.dev/connect") */
     urlForStreamEndpoint: string;
     /** The SSE event name that delivers the connection response (e.g., "ConnectionResponse") */
     connectEvent: string;

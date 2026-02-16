@@ -24,7 +24,8 @@ export function Chat({ room }: { room: string }) {
         if (!room || !stream.isConnected) return;
         if (!stream.connectionId) return;
 
-        fetch("http://localhost:5050/join", {
+        //fetch("http://localhost:5050/join", {
+        fetch("https://chatapp-server.fly.dev/join", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -71,7 +72,8 @@ export function Chat({ room }: { room: string }) {
         if (!input.trim() || !username) return;
         console.log("Sending message as user:", username);
         try {
-            await fetch("http://localhost:5050/send", {
+            //await fetch("http://localhost:5050/send", {
+            await fetch("https://chatapp-server.fly.dev/send", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -98,7 +100,8 @@ export function Chat({ room }: { room: string }) {
 
         const loadMessages = async () => {
             try{
-                const res = await fetch(`http://localhost:5050/messages/${room}`);
+                //const res = await fetch(`http://localhost:5050/messages/${room}`);
+                const res = await fetch(`https://chatapp-server.fly.dev/messages/${room}`);
 
                 if(!res.ok){
                     return;
@@ -140,7 +143,8 @@ export function Chat({ room }: { room: string }) {
 
     const sendTyping = async (isTyping: boolean) => {
         try {
-            await fetch("http://localhost:5050/typing", {
+            //await fetch("http://localhost:5050/typing", {
+            await fetch("https://chatapp-server.fly.dev/typing", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

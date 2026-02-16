@@ -11,13 +11,18 @@ using StateleSSE.AspNetCore;
 
 [ApiController]
 [Route("")]
-public class RealtimeController(
-    ISseBackplane backplane,
-    MyDbContext ctx,
-    JwtService jwtService) : ControllerBase
+public class RealtimeController : ControllerBase
 {
-    private readonly MyDbContext _ctx = ctx;
-    private readonly JwtService _jwtService = jwtService;
+    private readonly ISseBackplane _backplane;
+    private readonly MyDbContext _ctx;
+    private readonly JwtService _jwtService;
+
+    public RealtimeController(ISseBackplane backplane, MyDbContext ctx, JwtService jwtService)
+    {
+        _backplane = backplane;
+        _ctx = ctx;
+        _jwtService = jwtService;
+    }
 
     [HttpGet("connect")]
     public async Task Connect([FromQuery] string token)
@@ -31,7 +36,7 @@ public class RealtimeController(
         }
         
         await using var sse = await HttpContext.OpenSseStreamAsync();
-        await using var connection = backplane.CreateConnection();
+        await using var connection = _backplane.CreateConnection();
 
         await sse.WriteAsync("connected", JsonSerializer.Serialize(new { connection.ConnectionId, username },
             new JsonSerializerOptions()
@@ -94,8 +99,8 @@ public class RealtimeController(
     [HttpPost("join")]
     public async Task Join([FromBody] JoinDto dto)
     {
-        await backplane.Groups.AddToGroupAsync(dto.connectionId, dto.room);
-        await backplane.Clients.SendToGroupAsync(dto.room, new JoinResponse("Someone has entered the chat!"));
+        await _backplane.Groups.AddToGroupAsync(dto.connectionId, dto.room);
+        await _backplane.Clients.SendToGroupAsync(dto.room, new JoinResponse("Someone has entered the chat!"));
     }
 
     
@@ -142,7 +147,7 @@ public class RealtimeController(
         _ctx.Messages.Add(message);
         await _ctx.SaveChangesAsync();
         
-        await backplane.Clients.SendToGroupAsync(
+        await _backplane.Clients.SendToGroupAsync(
             dto.room,
             new ChatResponse(username, dto.message)
         );
@@ -153,19 +158,19 @@ public class RealtimeController(
     [HttpPost("poke")]
     public async Task Poke(string connectionId)
     {
-        await backplane.Clients.SendToClientAsync(connectionId, new PokeResponse("You have been poked!"));
+        await _backplane.Clients.SendToClientAsync(connectionId, new PokeResponse("You have been poked!"));
     }
 
     [HttpPost("leave")]
     public async Task Leave(string roomId, string connectionId)
     {
-        await backplane.Groups.RemoveFromGroupAsync(connectionId, roomId);
+        await _backplane.Groups.RemoveFromGroupAsync(connectionId, roomId);
     }
 
     [HttpPost("typing")]
     public async Task Typing([FromBody] TypingRequest request)
     {
-        await backplane.Clients.SendToGroupAsync(
+        await _backplane.Clients.SendToGroupAsync(
             request.Room,
             new TypingResponse("Someone", request.IsTyping)
         );
