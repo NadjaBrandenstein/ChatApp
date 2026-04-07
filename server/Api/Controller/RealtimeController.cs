@@ -182,7 +182,7 @@ public class RealtimeController : ControllerBase
         var messages = await _ctx.Messages.Where(m => m.Room.Roomname == roomName)
             .Where(m => m.Recipientuserid == null)
             .OrderByDescending(m => m.Sentat)
-            .Take(20)
+            .Take(50)
             .Select(m => new
             {
                 user = m.Senderuser.Username,

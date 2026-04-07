@@ -55,6 +55,7 @@
     border-radius: 20px;
     align-self: flex-start;
     word-wrap: break-word;
+    text-align: left;
 }
 
 .chat-user{
@@ -78,6 +79,7 @@
 
 .chat-message.own .chat-bubble {
     background-color: #f2d935;
+    align-self: flex-end;
 }
 
 .chat-input {
