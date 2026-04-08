@@ -55,8 +55,6 @@ public class Program
             builder.Services.AddInMemorySseBackplane();
         }
         
-        
-        
         // --------------------------
         // Controllers
         // --------------------------
@@ -104,9 +102,6 @@ public class Program
             
         builder.Services.AddAuthorization();
         builder.Services.AddScoped<JwtService>();
-
-
-        //builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     }
 
     public static async Task Main(string[] args)
@@ -119,9 +114,7 @@ public class Program
         var app = builder.Build();
         
         app.UseRouting();
-        //app.UseExceptionHandler();
-
-        //app.UseCors(conf => conf.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(_ => true));
+        
         app.UseCors(_ => _.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(_ => true));
         
         app.UseDefaultFiles();
@@ -137,15 +130,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
         
-        
         app.MapControllers();
         
         await app.RunAsync();
-        
     }
-    
 }
-
-
-//builder.Services.AddInMemorySseBackplane();
-
