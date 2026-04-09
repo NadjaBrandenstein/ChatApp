@@ -25,7 +25,7 @@ export function Chat({ room }: { room: string }) {
         if (!stream.connectionId) return;
 
         //fetch("http://localhost:5050/join", {
-        fetch("https://chatapp-server.fly.dev/join", {
+        fetch("https://chatapp-server.fly.dev/chat/join", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export function Chat({ room }: { room: string }) {
         console.log("Sending message as user:", username);
         try {
             //await fetch("http://localhost:5050/send", {
-            await fetch("https://chatapp-server.fly.dev/send", {
+            await fetch("https://chatapp-server.fly.dev/chat/send", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -144,7 +144,7 @@ export function Chat({ room }: { room: string }) {
     const sendTyping = async (isTyping: boolean) => {
         try {
             //await fetch("http://localhost:5050/typing", {
-            await fetch("https://chatapp-server.fly.dev/typing", {
+            await fetch("https://chatapp-server.fly.dev/chat/typing", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

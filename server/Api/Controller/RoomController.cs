@@ -19,7 +19,7 @@ public class RoomController : ControllerBase
     }
     
     [Authorize]
-    [HttpGet("getRooms")]
+    [HttpGet]
     public async Task<IActionResult> GetRooms()
     {
         var rooms = await _ctx.Rooms
@@ -30,7 +30,7 @@ public class RoomController : ControllerBase
     }
     
     [Authorize]
-    [HttpPost("rooms")]
+    [HttpPost]
     public async Task<IActionResult> CreateRoom([FromBody] CreateRoomDto dto)
     {
         if (await _ctx.Rooms.AnyAsync(r => r.Roomname == dto.RoomName))

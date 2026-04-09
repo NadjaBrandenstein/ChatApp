@@ -16,7 +16,7 @@ function Front() {
 
     const handleLogin = async () => {
         //const res = await fetch("http://localhost:5050/login", {
-        const res = await fetch("https://chatapp-server.fly.dev/login", {
+        const res = await fetch("https://chatapp-server.fly.dev/auth/login", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ username, password })
@@ -38,7 +38,7 @@ function Front() {
 
     const handleRegister = async () => {
         //const res = await fetch("http://localhost:5050/register", {
-        const res = await fetch("https://chatapp-server.fly.dev/register", {
+        const res = await fetch("https://chatapp-server.fly.dev/auth/register", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ username, password })
@@ -79,7 +79,7 @@ function Front() {
     const fetchRooms = async () => {
         const token = sessionStorage.getItem("token");
         //const res = await fetch("http://localhost:5050/getRooms", {
-        const res = await fetch("https://chatapp-server.fly.dev/getRooms", {
+        const res = await fetch("https://chatapp-server.fly.dev/rooms", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

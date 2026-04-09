@@ -13,7 +13,7 @@ public class MessageController : ControllerBase
         _ctx = ctx;
     }
     
-    [HttpGet("messages/{roomName}")]
+    [HttpGet("{roomName}")]
     public async Task<ActionResult> GetLastMessages(string roomName)
     {
         var messages = await _ctx.Messages.Where(m => m.Room.Roomname == roomName)

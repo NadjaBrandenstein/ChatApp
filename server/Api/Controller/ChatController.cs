@@ -23,8 +23,8 @@ public class ChatController : ControllerBase
         _ctx = ctx;
     }
     
-    [HttpPost("send")]
     [Authorize]
+    [HttpPost("send")]
     public async Task<IActionResult> Send([FromBody] ChatMessageDto dto)
     {
         var username = User.Identity!.Name;
